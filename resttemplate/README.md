@@ -1,6 +1,6 @@
 # Using RestTemplate in Spring with Apaches HttpClient
 
-##1. Introduction##
+##1. Introduction
 
 In another blog post, we already looked at how we use the class `RestTemplate` to consume REST web services. In today’s blog post we will take a look at how we can use Apache HttpComponents as the HTTP client API for the `RestTemplate`.
 
@@ -8,7 +8,7 @@ In another blog post, we already looked at how we use the class `RestTemplate` t
 
 In addition to Apache HttpComponents, other HTTP clients such as OkHttp or Netty can also be used in the RestTemplate substructure. The Spring Framework offers us the possibility to switch from the standard HTTP client (`HttpURLConnection`) to another HTTP client.
 
-##2. Downsides of the HttpURLConnection##
+##2. Downsides of the HttpURLConnection
 
 Some probably wonder why you should swap the underlying HTTP client API. Especially for productive applications there are good reasons to exchange the `HttpURLConnection` as underlying HTTP client API because it has some disadvantages, which also affect the use of `RestTemplate`:
 
@@ -18,7 +18,7 @@ Some probably wonder why you should swap the underlying HTTP client API. Especia
 
 Especially for applications in production, it is advisable to replace the standard HttpURLConnection with a proven HTTP client API like Apache when using `RestTemplate`.
 
-##3. Used Dependencies##
+##3. Used Dependencies
 
 To use `RestTemplate` and Apache HttpComponents as underlying HTTP client API, the following two dependencies are required:
 
@@ -33,7 +33,7 @@ To use `RestTemplate` and Apache HttpComponents as underlying HTTP client API, t
       </dependency>
     </dependencies>
 
-##4. Configuration of Apache HttpComponents##
+##4. Configuration of Apache HttpComponents
 
 As mentioned earlier, using an HTTP client API such as Apache HttpComponents allows us to add a number of additional configurations. The basic structure of our configuration class is as follows:
 
@@ -45,7 +45,7 @@ As mentioned earlier, using an HTTP client API such as Apache HttpComponents all
 
 In this class, we will now create beans to configure the HTTP client. The whole source code can be found in our GitHub Repository.
 
-###4.1 Connection Pool###
+###4.1 Connection Pool
 
 A connection pool ensures that already opened connections are reused. This means that connections don’t have to be re-established every time, saving us a lot of overhead and time. Especially the handshake procedure when establishing a connection consumes the most time in relation to the other.
 
@@ -70,7 +70,7 @@ The number of pooled connections can be defined in total, per route and for all 
 
 We will use this bean later when we build our HTTP client bean from our configuration beans.
 
-###4.2 Connection Keep-Alive Strategy###
+###4.2 Connection Keep-Alive Strategy
 
 A connection Keep-Alive strategy determines how long a connection may remain unused in the pool until it is closed. This ensures that connections that are no longer needed are closed again promptly.
 
@@ -99,7 +99,7 @@ The bean implements the following behavior: If the server does not send a `Keep-
 
 This implementation is a workaround to bypass the Apache `Keep-Alive` strategy. Apaches strategy assumes that connections should remain alive indefinitely if the server does not send a Keep-Alive header. This standard behavior is now explicitly circumvented by our implementation.
 
-###4.3 IDLE Connection Monitor###
+###4.3 IDLE Connection Monitor
 
 Furthermore, we want to configure a connection monitor that runs every 20 seconds and closes outdated connections as well as long waiting connections:
 
@@ -130,7 +130,7 @@ We also need our own thread pool to schedule and execute tasks automatically. Fo
           return scheduler;
       }
       
-###4.4 HttpClient Bean###
+###4.4 HttpClient Bean
 
 Before we build our HTTP client, we define the following timeouts via `RequestConfig` class:
 
@@ -157,7 +157,7 @@ Then we can use the connection pool and the keep-alive strategy bean to build ou
       
 Now we have finished configuring our HTTP client. In the next step, we will connect the HTTP client with the `RestTemplate` so that it uses our HTTP client for all HTTP calls.
 
-##5. Configuration of RestTemplate##
+##5. Configuration of RestTemplate
 
 The Wiring of the HTTP client with the `RestTemplate` is done in a new config class. The basic structure of the `RestTemplateConfig` class is as follows:
 
@@ -172,7 +172,7 @@ The Wiring of the HTTP client with the `RestTemplate` is done in a new config cl
 
 Via the constructor, we injected our just configured HTTP client so that we can wire it here with the `RestTemplate`.
 
-###5.1 HTTP Request Factory###
+###5.1 HTTP Request Factory
 
 First, we define a bean of type `HttpComponentsClientHttpRequestFactory`. This factory internally uses Apache HttpComponents to generate HTTP requests. We link this bean to the Apache HTTP client that we injected before through our constructor:
 
@@ -183,7 +183,7 @@ First, we define a bean of type `HttpComponentsClientHttpRequestFactory`. This f
           return clientHttpRequestFactory;
       }
 
-###5.2 Custom Error Handler###
+###5.2 Custom Error Handler
 
 Without an own error handler, a default error handler would be used, which punishes us with an exception for an ordinary client error like `404 Not Found` or `400 Bad Request`. This, in turn, forces us to wrap every HTTP request into a try/catch block, which quickly inflates the code and makes it unclear, since we have to handle the error in the middle of the business logic. Much more elegant at this point is the use of an own error handler, which can be implemented as follows:
 
@@ -203,7 +203,7 @@ Without an own error handler, a default error handler would be used, which punis
       
 The error handler is very simple and makes sure that all 4xx errors are logged and no exceptions are thrown anymore.
 
-###5.3 HTTP Request Interceptor###
+###5.3 HTTP Request Interceptor
 
 An HTTP request interceptor intercepts each HTTP request and allows the execution of additional code. This makes an interceptor excellent for logging every HTTP request that is sent. This can be very helpful for debugging.
 
@@ -228,7 +228,7 @@ All HTTP requests are then logged to the console:
 https://springframework.guru/wp-content/uploads/2019/05/using-resttemplate-with-apache-httpcomponents.png
 
 
-###5.4 Create RestTemplate Bean###
+###5.4 Create RestTemplate Bean
 
 Finally, we configure our `RestTemplate` Bean:
 
@@ -243,7 +243,7 @@ Finally, we configure our `RestTemplate` Bean:
 
 To configure `RestTemplate` we can use the handy `RestTemplateBuilder`. With the builder, we wire the `clientHttpRequestFactory` bean as well as our own error handler and our interceptor. That’s it – that’s all we have to do to work with our specially configured `RestTemplate`.
 
-##6. Summary##
+##6. Summary
 
 In this blog post, we have looked at how we can easily replace the HTTP client API used by Springs `RestTemplate` with another one. We looked at the following configuration options:
 
