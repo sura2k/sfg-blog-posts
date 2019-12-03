@@ -70,7 +70,7 @@ The number of pooled connections can be defined in total, per route and for all 
 
 We will use this bean later when we build our HTTP client bean from our configuration beans.
 
-###4.2 Connection Keep-Alive Strategy
+### 4.2 Connection Keep-Alive Strategy
 
 A connection Keep-Alive strategy determines how long a connection may remain unused in the pool until it is closed. This ensures that connections that are no longer needed are closed again promptly.
 
@@ -172,7 +172,7 @@ The Wiring of the HTTP client with the `RestTemplate` is done in a new config cl
 
 Via the constructor, we injected our just configured HTTP client so that we can wire it here with the `RestTemplate`.
 
-###5.1 HTTP Request Factory
+### 5.1 HTTP Request Factory
 
 First, we define a bean of type `HttpComponentsClientHttpRequestFactory`. This factory internally uses Apache HttpComponents to generate HTTP requests. We link this bean to the Apache HTTP client that we injected before through our constructor:
 
